@@ -111,16 +111,27 @@ def plot_mcc_shifts(df_mcc_analysis):
     colors = ["#d62728" if x < 0 else "#2ca02c" for x in top["pct_change"]]
     labels = [s[:45] + "…" if len(s) > 45 else s for s in top["mcc_name"]]
 
-    fig, ax = plt.subplots(figsize=(13, 10))
-    bars = ax.barh(labels, top["pct_change"], color=colors)
-    ax.axvline(0, color="black", linewidth=1.2)
-    ax.set_xlabel("Изменение среднего чека (%)")
-    ax.set_title("Реакция MCC-категорий на геомагнитные бури (Kp ≥ 4)\n(только статистически значимые, FDR-adjusted p < 0.05)", fontsize=13)
+    fig, ax = plt.subplots(figsize=(15, 9))
+    bars = ax.barh(labels, top["pct_change"], color=colors, height=0.6)
+    ax.axvline(0, color="black", linewidth=1.5)
+    ax.set_xlabel("Изменение среднего чека (%)", fontsize=16)
+    ax.set_title("Реакция MCC-категорий на геомагнитные бури (Kp ≥ 4)\n(только статистически значимые, FDR-adjusted p < 0.05)", fontsize=17)
+    ax.tick_params(axis="both", labelsize=14)
 
+    x_min = top["pct_change"].min()
     for bar in bars:
         w = bar.get_width()
-        ax.text(w + (1 if w > 0 else -1), bar.get_y() + bar.get_height() / 2,
-                f"{w:+.1f}%", va="center", fontsize=9, fontweight="bold")
+        offset = 0.3 if w >= 0 else -0.3
+        ha = "left" if w >= 0 else "right"
+        # для длинных отрицательных баров — ставим метку правее нуля
+        if w < x_min * 0.6:
+            ax.text(0.3, bar.get_y() + bar.get_height() / 2,
+                    f"{w:+.1f}%", va="center", ha="left",
+                    fontsize=14, fontweight="bold", color="white")
+        else:
+            ax.text(w + offset, bar.get_y() + bar.get_height() / 2,
+                    f"{w:+.1f}%", va="center", ha=ha,
+                    fontsize=14, fontweight="bold")
 
     plt.tight_layout()
     plt.savefig(PLOTS / "mcc_shifts.png", dpi=150)
