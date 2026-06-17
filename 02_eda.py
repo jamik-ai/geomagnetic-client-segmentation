@@ -103,8 +103,11 @@ def analyze_value_groups(df_full):
     return pd.DataFrame(result).T
 
 
+EXCLUDE_MCC = {"Toll and Bridge Fees", "Direct Marketing – Catalog Merchant"}
+
 def plot_mcc_shifts(df_mcc_analysis):
-    top = pd.concat([df_mcc_analysis.head(12), df_mcc_analysis.tail(12)]).drop_duplicates()
+    df = df_mcc_analysis[~df_mcc_analysis["mcc_name"].isin(EXCLUDE_MCC)]
+    top = pd.concat([df.head(12), df.tail(12)]).drop_duplicates()
     colors = ["#d62728" if x < 0 else "#2ca02c" for x in top["pct_change"]]
     labels = [s[:45] + "…" if len(s) > 45 else s for s in top["mcc_name"]]
 
